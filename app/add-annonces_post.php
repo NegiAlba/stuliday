@@ -18,6 +18,7 @@ if (empty($_POST['type']) || empty($_POST['capacity']) || empty($_POST['country'
     $price = htmlspecialchars(floatval($_POST['price']));
     $date_start = htmlspecialchars(trim($_POST['date_start']));
     $date_end = htmlspecialchars(trim($_POST['date_end']));
+    $id = $_SESSION['id'];
 
     if (!empty($_POST['location_adress'])) {
         $location_adress = htmlspecialchars(trim($_POST['location_adress']));
@@ -29,25 +30,21 @@ if (empty($_POST['type']) || empty($_POST['capacity']) || empty($_POST['country'
     } else {
         $description = null;
     }
-        
 
     if (empty($_FILES['image']['name'])) {
         $imagePath = 'uploads/wait.jpg';
         $image = null;
-        
-    }else {
+    } else {
         $image = $_FILES['image'];
     }
 }
 
-if (null !== $date_start && null !==$date_end && $date_end < $date_start) {
+if (null !== $date_start && null !== $date_end && $date_end < $date_start) {
     header('Location:add-annonces.php?error=pastAvailablity');
     exit();
 }
 
-
 if ($image) {
-    
     $valid_ext = ['jpg', 'jpeg', 'png'];
     $check_ext = strtolower(substr(strrchr($image['name'], '.'), 1));
 
@@ -68,7 +65,7 @@ if ($image) {
     }
 }
 
-$insertAnnonce = 'INSERT INTO location (type,capacity,location_adress,country,description,price,image,date_start,date_end) VALUES(:type,:capacity,:location_adress,:country,:description,:price,:image,:date_start,:date_end)';
+$insertAnnonce = 'INSERT INTO location (type,capacity,location_adress,country,description,price,image,date_start,date_end,id) VALUES(:type,:capacity,:location_adress,:country,:description,:price,:image,:date_start,:date_end,:id)';
 $reqInsertAnnonce = $connexion->prepare($insertAnnonce);
 $reqInsertAnnonce->bindValue(':type', $type, PDO::PARAM_STR);
 $reqInsertAnnonce->bindValue(':capacity', $capacity);
@@ -79,6 +76,7 @@ $reqInsertAnnonce->bindValue(':price', $price);
 $reqInsertAnnonce->bindValue(':image', $imagePath, PDO::PARAM_STR);
 $reqInsertAnnonce->bindValue(':date_start', $date_start, PDO::PARAM_STR);
 $reqInsertAnnonce->bindValue(':date_end', $date_end, PDO::PARAM_STR);
+$reqInsertAnnonce->bindValue(':id', $id);
 
 if ($reqInsertAnnonce->execute()) {
     header('Location:profil.php?success=addedProduct');
@@ -87,4 +85,3 @@ if ($reqInsertAnnonce->execute()) {
     header('Location:add-annonces.php?error=unknownError');
     exit();
 }
-?>
